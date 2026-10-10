@@ -2,10 +2,14 @@
 package com.example.logingithub
 
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,12 +21,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.logingithub.ui.theme.LoginGitHubTheme
+import kotlinx.coroutines.launch
 
 private val Azul = Color(0xFF355CE7)
 private val Fondo = Color(0xFFF3F6FC)
@@ -36,21 +43,108 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LoginGitHubTheme {
-                MenuPrincipal(
-                    abrirAcercaDe = {
-                        startActivity(
-                            Intent(
-                                this,
-                                AcercaDeActivity::class.java
-                            )
-                        )
-                    },
-                    cerrarSesion = {
-                        // Temporalmente cierra la pantalla.
-                        // Después conectaremos el logout real.
-                        finish()
-                    }
-                )
+                val context = LocalContext.current
+                val scope = rememberCoroutineScope()
+                val repository = remember { GitHubOAuthRepository() }
+
+                var authenticatedUser by remember { mutableStateOf<GitHubUser?>(null) }
+                var accessToken by remember { mutableStateOf<String?>(null) }
+                var isLoading by remember { mutableStateOf(false) }
+                var message by remember { mutableStateOf("") }
+                var deviceCodeObj by remember { mutableStateOf<GitHubDeviceCode?>(null) }
+
+                if (authenticatedUser == null) {
+                    LoginScreen(
+                        isLoading = isLoading,
+                        message = message,
+                        userCode = deviceCodeObj?.userCode,
+                        onGitHubClick = {
+                            if (!isLoading) {
+                                scope.launch {
+                                    isLoading = true
+                                    message = "Solicitando código de autorización..."
+
+                                    try {
+                                        // 1. Obtener código de GitHub
+                                        val device = repository.requestDeviceCode()
+                                        deviceCodeObj = device
+
+                                        val clipboard = context.getSystemService(
+                                            ClipboardManager::class.java
+                                        )
+                                        clipboard?.setPrimaryClip(
+                                            ClipData.newPlainText(
+                                                "Código de autorización de GitHub",
+                                                device.userCode
+                                            )
+                                        )
+
+                                        message = "Código ${device.userCode} copiado. Abriendo GitHub..."
+
+                                        // 2. Construir la URL con el código autocompletado
+                                        val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
+
+                                        // 3. Abrir en Custom Tab
+                                        val customTabsIntent = CustomTabsIntent.Builder().build()
+                                        customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
+
+                                        // 4. Iniciar el polling inmediatamente
+                                        val token = repository.pollForAccessToken(device)
+                                        val user = repository.getAuthenticatedUser(token)
+
+                                        accessToken = token
+                                        authenticatedUser = user
+                                        message = ""
+                                        deviceCodeObj = null
+
+                                    } catch (e: kotlinx.coroutines.CancellationException) {
+                                        // Cancelación limpia si se reinicia la vista
+                                    } catch (e: Exception) {
+                                        var causa: Throwable? = e
+                                        var falloDns = false
+                                        while (causa != null) {
+                                            if (causa is java.net.UnknownHostException) {
+                                                falloDns = true
+                                                break
+                                            }
+                                            causa = causa.cause
+                                        }
+                                        message = if (falloDns) {
+                                            "Error: Android no puede encontrar github.com. Verifica que el teléfono o emulador tenga Internet; si la red sí funciona, desactiva temporalmente el DNS privado/VPN y vuelve a intentar."
+                                        } else {
+                                            "Error: " + (e.message ?: "Ocurrió un problema de conexión.")
+                                        }
+                                    } finally {
+                                        isLoading = false
+                                    }
+                                }
+                            }
+                        },
+                        onOpenVerification = {
+                            deviceCodeObj?.let { device ->
+                                val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
+                                val customTabsIntent = CustomTabsIntent.Builder().build()
+                                customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
+                            }
+                        }
+                    )
+                } else {
+                    MenuPrincipal(
+                        nombreUsuario = authenticatedUser?.name
+                            ?.takeIf { it.isNotBlank() }
+                            ?: authenticatedUser?.login
+                            ?: "usuario",
+                        abrirAcercaDe = {
+                            startActivity(Intent(this@MainActivity, AcercaDeActivity::class.java))
+                        },
+                        cerrarSesion = {
+                            accessToken = null
+                            authenticatedUser = null
+                            deviceCodeObj = null
+                            message = ""
+                        }
+                    )
+                }
             }
         }
     }
@@ -58,6 +152,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MenuPrincipal(
+    nombreUsuario: String,
     abrirAcercaDe: () -> Unit,
     cerrarSesion: () -> Unit
 ) {
@@ -102,6 +197,17 @@ fun MenuPrincipal(
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 color = Texto
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = nombreUsuario,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Azul,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -303,6 +409,7 @@ fun OpcionMenu(
 fun MenuPreview() {
     LoginGitHubTheme {
         MenuPrincipal(
+            nombreUsuario = "Usuario",
             abrirAcercaDe = {},
             cerrarSesion = {}
         )
