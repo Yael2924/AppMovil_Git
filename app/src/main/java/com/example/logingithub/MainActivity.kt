@@ -1,21 +1,21 @@
-
 package com.example.logingithub
 
-import android.content.Intent
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.background
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +25,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.logingithub.ui.theme.LoginGitHubTheme
 import kotlinx.coroutines.launch
 
@@ -38,6 +39,7 @@ private val Texto = Color(0xFF152443)
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -47,103 +49,116 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 val repository = remember { GitHubOAuthRepository() }
 
+                var showSplash by remember { mutableStateOf(true) }
                 var authenticatedUser by remember { mutableStateOf<GitHubUser?>(null) }
                 var accessToken by remember { mutableStateOf<String?>(null) }
                 var isLoading by remember { mutableStateOf(false) }
                 var message by remember { mutableStateOf("") }
                 var deviceCodeObj by remember { mutableStateOf<GitHubDeviceCode?>(null) }
 
-                if (authenticatedUser == null) {
-                    LoginScreen(
-                        isLoading = isLoading,
-                        message = message,
-                        userCode = deviceCodeObj?.userCode,
-                        onGitHubClick = {
-                            if (!isLoading) {
-                                scope.launch {
-                                    isLoading = true
-                                    message = "Solicitando código de autorización..."
+                Crossfade(
+                    targetState = showSplash,
+                    animationSpec = tween(durationMillis = 500),
+                    label = "SplashTransition",
+                ) { isShowingSplash ->
+                    if (isShowingSplash) {
+                        SplashScreen(
+                            onSplashFinished = {
+                                showSplash = false
+                            }
+                        )
+                    } else if (authenticatedUser == null) {
+                        LoginScreen(
+                            isLoading = isLoading,
+                            message = message,
+                            userCode = deviceCodeObj?.userCode,
+                            onGitHubClick = {
+                                if (!isLoading) {
+                                    scope.launch {
+                                        isLoading = true
+                                        message = "Solicitando código de autorización..."
 
-                                    try {
-                                        // 1. Obtener código de GitHub
-                                        val device = repository.requestDeviceCode()
-                                        deviceCodeObj = device
+                                        try {
+                                            // 1. Obtener código de GitHub
+                                            val device = repository.requestDeviceCode()
+                                            deviceCodeObj = device
 
-                                        val clipboard = context.getSystemService(
-                                            ClipboardManager::class.java
-                                        )
-                                        clipboard?.setPrimaryClip(
-                                            ClipData.newPlainText(
-                                                "Código de autorización de GitHub",
-                                                device.userCode
+                                            val clipboard = context.getSystemService(
+                                                ClipboardManager::class.java
                                             )
-                                        )
+                                            clipboard?.setPrimaryClip(
+                                                ClipData.newPlainText(
+                                                    "Código de autorización de GitHub",
+                                                    device.userCode
+                                                )
+                                            )
 
-                                        message = "Código ${device.userCode} copiado. Abriendo GitHub..."
+                                            message = "Código ${device.userCode} copiado. Abriendo GitHub..."
 
-                                        // 2. Construir la URL con el código autocompletado
-                                        val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
+                                            // 2. Construir la URL con el código autocompletado
+                                            val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
 
-                                        // 3. Abrir en Custom Tab
-                                        val customTabsIntent = CustomTabsIntent.Builder().build()
-                                        customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
+                                            // 3. Abrir en Custom Tab
+                                            val customTabsIntent = CustomTabsIntent.Builder().build()
+                                            customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
 
-                                        // 4. Iniciar el polling inmediatamente
-                                        val token = repository.pollForAccessToken(device)
-                                        val user = repository.getAuthenticatedUser(token)
+                                            // 4. Iniciar el polling inmediatamente
+                                            val token = repository.pollForAccessToken(device)
+                                            val user = repository.getAuthenticatedUser(token)
 
-                                        accessToken = token
-                                        authenticatedUser = user
-                                        message = ""
-                                        deviceCodeObj = null
+                                            accessToken = token
+                                            authenticatedUser = user
+                                            message = ""
+                                            deviceCodeObj = null
 
-                                    } catch (e: kotlinx.coroutines.CancellationException) {
-                                        // Cancelación limpia si se reinicia la vista
-                                    } catch (e: Exception) {
-                                        var causa: Throwable? = e
-                                        var falloDns = false
-                                        while (causa != null) {
-                                            if (causa is java.net.UnknownHostException) {
-                                                falloDns = true
-                                                break
+                                        } catch (e: kotlinx.coroutines.CancellationException) {
+                                            // Cancelación limpia si se reinicia la vista
+                                        } catch (e: Exception) {
+                                            var causa: Throwable? = e
+                                            var falloDns = false
+                                            while (causa != null) {
+                                                if (causa is java.net.UnknownHostException) {
+                                                    falloDns = true
+                                                    break
+                                                }
+                                                causa = causa.cause
                                             }
-                                            causa = causa.cause
+                                            message = if (falloDns) {
+                                                "Error: Android no puede encontrar github.com. Verifica que el teléfono o emulador tenga Internet; si la red sí funciona, desactiva temporalmente el DNS privado/VPN y vuelve a intentar."
+                                            } else {
+                                                "Error: " + (e.message ?: "Ocurrió un problema de conexión.")
+                                            }
+                                        } finally {
+                                            isLoading = false
                                         }
-                                        message = if (falloDns) {
-                                            "Error: Android no puede encontrar github.com. Verifica que el teléfono o emulador tenga Internet; si la red sí funciona, desactiva temporalmente el DNS privado/VPN y vuelve a intentar."
-                                        } else {
-                                            "Error: " + (e.message ?: "Ocurrió un problema de conexión.")
-                                        }
-                                    } finally {
-                                        isLoading = false
                                     }
                                 }
+                            },
+                            onOpenVerification = {
+                                deviceCodeObj?.let { device ->
+                                    val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
+                                    val customTabsIntent = CustomTabsIntent.Builder().build()
+                                    customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
+                                }
                             }
-                        },
-                        onOpenVerification = {
-                            deviceCodeObj?.let { device ->
-                                val urlConCodigo = "https://github.com/login/device?user_code=${device.userCode}"
-                                val customTabsIntent = CustomTabsIntent.Builder().build()
-                                customTabsIntent.launchUrl(context, Uri.parse(urlConCodigo))
+                        )
+                    } else {
+                        MenuPrincipal(
+                            nombreUsuario = authenticatedUser?.name
+                                ?.takeIf { it.isNotBlank() }
+                                ?: authenticatedUser?.login
+                                ?: "usuario",
+                            abrirAcercaDe = {
+                                startActivity(Intent(this@MainActivity, AcercaDeActivity::class.java))
+                            },
+                            cerrarSesion = {
+                                accessToken = null
+                                authenticatedUser = null
+                                deviceCodeObj = null
+                                message = ""
                             }
-                        }
-                    )
-                } else {
-                    MenuPrincipal(
-                        nombreUsuario = authenticatedUser?.name
-                            ?.takeIf { it.isNotBlank() }
-                            ?: authenticatedUser?.login
-                            ?: "usuario",
-                        abrirAcercaDe = {
-                            startActivity(Intent(this@MainActivity, AcercaDeActivity::class.java))
-                        },
-                        cerrarSesion = {
-                            accessToken = null
-                            authenticatedUser = null
-                            deviceCodeObj = null
-                            message = ""
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
