@@ -20,8 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             LoginGitHubTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                    AcercaDeScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
