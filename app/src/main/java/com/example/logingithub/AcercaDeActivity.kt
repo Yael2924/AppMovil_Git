@@ -5,11 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +40,17 @@ class AcercaDeActivity : ComponentActivity() {
 @Composable
 fun PantallaAcercaDe(regresar: () -> Unit) {
 
+    val estudiantes = listOf(
+        "Cruz López Ángel de Jesús",
+        "De la Cruz Cruz Saúl Yael",
+        "Gómez Sánchez Juan de Jesús",
+        "Santiago Sánchez Jehovani"
+    )
+
+    var estudianteSeleccionado by remember {
+        mutableStateOf<String?>(null)
+    }
+
     Scaffold(
         containerColor = Color(0xFFF3F6FC)
     ) { innerPadding ->
@@ -46,18 +59,28 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             TextButton(
-                onClick = regresar,
+                onClick = {
+                    if (estudianteSeleccionado != null) {
+                        estudianteSeleccionado = null
+                    } else {
+                        regresar()
+                    }
+                },
                 modifier = Modifier.align(Alignment.Start)
             ) {
-                Text("← Regresar")
+                Text(
+                    text = "← Regresar",
+                    color = Color(0xFF355CE7)
+                )
             }
 
-            Spacer(modifier = Modifier.height(65.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Acerca de",
@@ -68,41 +91,175 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(25.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            if (estudianteSeleccionado == null) {
+
+                estudiantes.forEach { estudiante ->
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 14.dp)
+                            .clickable {
+                                estudianteSeleccionado = estudiante
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 4.dp
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(22.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = estudiante,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Tarjeta original de LoginGitHub
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    )
                 ) {
-                    Text(
-                        text = "LoginGitHub",
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF355CE7)
+                    Column(
+                        modifier = Modifier.padding(25.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "LoginGitHub",
+                            fontSize = 23.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF355CE7)
+                        )
+
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Text(
+                            text = "Aplicación desarrollada con Kotlin y Jetpack Compose.",
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 23.sp,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Versión 1.0",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+            } else {
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 4.dp
                     )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
 
-                    Spacer(modifier = Modifier.height(15.dp))
+                        // Nombre de la universidad ajustado al ancho disponible
+                        Text(
+                            text = "UNIVERSIDAD TECNOLÓGICA\nDE LA SELVA",
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF355CE7),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 25.sp
+                        )
 
-                    Text(
-                        text = "Aplicación desarrollada con Kotlin y Jetpack Compose.",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 23.sp,
-                        color = Color.Gray
-                    )
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Ing. en Desarrollo y Gestión de Software",
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF152443),
+                            textAlign = TextAlign.Center
+                        )
 
-                    Text(
-                        text = "Versión 1.0",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "Desarrollo Móvil Integral",
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 16.sp,
+                            color = Color(0xFF152443),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "Grado: 10  Grupo: A",
+                            fontSize = 15.sp,
+                            color = Color(0xFF152443),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 24.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "Docente: Armando Méndez Morales",
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 15.sp,
+                            color = Color(0xFF152443),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(25.dp))
+
+                        HorizontalDivider(
+                            color = Color(0xFFD9E1F2)
+                        )
+
+                        Spacer(modifier = Modifier.height(25.dp))
+
+                        Text(
+                            text = "$estudianteSeleccionado, " +
+                                    "estudiante de la Universidad Tecnológica " +
+                                    "de la Selva, cursando el 10 cuatrimestre " +
+                                    "del grupo A de la carrera Ing. en " +
+                                    "Desarrollo y Gestión de Software.",
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 16.sp,
+                            color = Color(0xFF333333),
+                            textAlign = TextAlign.Justify,
+                            lineHeight = 25.sp
+                        )
+                    }
                 }
             }
         }
