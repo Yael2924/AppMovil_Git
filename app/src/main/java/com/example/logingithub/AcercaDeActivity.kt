@@ -1,4 +1,3 @@
-
 package com.example.logingithub
 
 import android.os.Bundle
@@ -59,10 +58,14 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
     val esPerfilPersonalizado =
         estudianteSeleccionado == "De la Cruz Cruz Saúl Yael" ||
-                estudianteSeleccionado == "Gómez Sánchez Juan de Jesús"
+                estudianteSeleccionado == "Gómez Sánchez Juan de Jesús" ||
+                estudianteSeleccionado == "Santiago Sánchez Jehovani"
 
     val esJuan =
         estudianteSeleccionado == "Gómez Sánchez Juan de Jesús"
+
+    val esJehovani =
+        estudianteSeleccionado == "Santiago Sánchez Jehovani"
 
     Scaffold(
         containerColor = Color(0xFFF3F6FC)
@@ -222,19 +225,19 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Fotografía personal de Saúl o Juan
+                            // Fotografía personal de Saúl, Juan o Jehovani
                             Image(
                                 painter = painterResource(
-                                    id = if (esJuan) {
-                                        R.drawable.juan
-                                    } else {
-                                        R.drawable.saul
+                                    id = when {
+                                        esJuan -> R.drawable.juan
+                                        esJehovani -> R.drawable.jehovani
+                                        else -> R.drawable.saul
                                     }
                                 ),
-                                contentDescription = if (esJuan) {
-                                    "Foto de Juan de Jesús Gómez Sánchez"
-                                } else {
-                                    "Foto de Saúl Yael de la Cruz Cruz"
+                                contentDescription = when {
+                                    esJuan -> "Foto de Juan de Jesús Gómez Sánchez"
+                                    esJehovani -> "Foto de Jehovani Santiago Sánchez"
+                                    else -> "Foto de Saúl Yael de la Cruz Cruz"
                                 },
                                 modifier = Modifier
                                     .size(145.dp)
@@ -245,10 +248,10 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Text(
-                                text = if (esJuan) {
-                                    "Juan de Jesús Gómez Sánchez"
-                                } else {
-                                    "Saúl Yael de la Cruz Cruz"
+                                text = when {
+                                    esJuan -> "Juan de Jesús Gómez Sánchez"
+                                    esJehovani -> "Jehovani Santiago Sánchez"
+                                    else -> "Saúl Yael de la Cruz Cruz"
                                 },
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 fontSize = 22.sp,
