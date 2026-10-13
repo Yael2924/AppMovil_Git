@@ -56,16 +56,20 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
         mutableStateOf<String?>(null)
     }
 
-    val esPerfilPersonalizado =
-        estudianteSeleccionado == "De la Cruz Cruz Saúl Yael" ||
-                estudianteSeleccionado == "Gómez Sánchez Juan de Jesús" ||
-                estudianteSeleccionado == "Santiago Sánchez Jehovani"
-
     val esJuan =
         estudianteSeleccionado == "Gómez Sánchez Juan de Jesús"
 
     val esJehovani =
         estudianteSeleccionado == "Santiago Sánchez Jehovani"
+
+    val esAngel =
+        estudianteSeleccionado == "Cruz López Ángel de Jesús"
+
+    val esPerfilPersonalizado =
+        estudianteSeleccionado == "De la Cruz Cruz Saúl Yael" ||
+                esJuan ||
+                esJehovani ||
+                esAngel
 
     Scaffold(
         containerColor = Color(0xFFF3F6FC)
@@ -225,18 +229,20 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Fotografía personal de Saúl, Juan o Jehovani
+                            // Fotografía personal de Saúl, Juan, Jehovani o Ángel
                             Image(
                                 painter = painterResource(
                                     id = when {
                                         esJuan -> R.drawable.juan
                                         esJehovani -> R.drawable.jehovani
+                                        esAngel -> R.drawable.angel
                                         else -> R.drawable.saul
                                     }
                                 ),
                                 contentDescription = when {
                                     esJuan -> "Foto de Juan de Jesús Gómez Sánchez"
                                     esJehovani -> "Foto de Jehovani Santiago Sánchez"
+                                    esAngel -> "Foto de Ángel De Jesús Cruz López"
                                     else -> "Foto de Saúl Yael de la Cruz Cruz"
                                 },
                                 modifier = Modifier
@@ -251,6 +257,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                                 text = when {
                                     esJuan -> "Juan de Jesús Gómez Sánchez"
                                     esJehovani -> "Jehovani Santiago Sánchez"
+                                    esAngel -> "Ángel De Jesús Cruz López"
                                     else -> "Saúl Yael de la Cruz Cruz"
                                 },
                                 modifier = Modifier.padding(horizontal = 16.dp),
