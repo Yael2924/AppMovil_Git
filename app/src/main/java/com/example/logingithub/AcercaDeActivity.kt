@@ -1,20 +1,24 @@
-
 package com.example.logingithub
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image // <-- Importante para mostrar la foto
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape // <-- Para hacer la foto redonda
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip // <-- Para recortar la foto
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource // <-- Para enlazar la foto desde drawable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -91,6 +95,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
             Spacer(modifier = Modifier.height(25.dp))
 
+            // Si no hay estudiante seleccionado, mostramos solo la lista de nombres
             if (estudianteSeleccionado == null) {
 
                 estudiantes.forEach { estudiante ->
@@ -129,7 +134,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Tarjeta original de LoginGitHub
+                // Tarjeta original de LoginGitHub al final de la lista
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -169,7 +174,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                 }
 
             } else {
-
+                // PANTALLA DE DETALLE (Se muestra al hacer click en un estudiante)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -187,6 +192,22 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
+                        // -----------------------------------------------------------------
+                        // NUEVO: FOTO DE ÁNGEL DE JESÚS (Se muestra solo si es seleccionado)
+                        // -----------------------------------------------------------------
+                        if (estudianteSeleccionado == "Cruz López Ángel de Jesús") {
+                            Image(
+                                painter = painterResource(id = R.drawable.angel_cruz), // Tu imagen en drawable
+                                contentDescription = "Foto de Cruz López Ángel de Jesús",
+                                modifier = Modifier
+                                    .size(130.dp) // Tamaño de la foto redonda
+                                    .clip(CircleShape), // Recorte circular estético
+                                contentScale = ContentScale.Crop
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                        // -----------------------------------------------------------------
+
                         // Nombre de la universidad ajustado al ancho disponible
                         Text(
                             text = "UNIVERSIDAD TECNOLÓGICA\nDE LA SELVA",
@@ -198,7 +219,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                             lineHeight = 25.sp
                         )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(15.dp))
 
                         Text(
                             text = "Ing. en Desarrollo y Gestión de Software",
