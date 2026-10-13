@@ -57,6 +57,13 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
         mutableStateOf<String?>(null)
     }
 
+    val esPerfilPersonalizado =
+        estudianteSeleccionado == "De la Cruz Cruz Saúl Yael" ||
+                estudianteSeleccionado == "Gómez Sánchez Juan de Jesús"
+
+    val esJuan =
+        estudianteSeleccionado == "Gómez Sánchez Juan de Jesús"
+
     Scaffold(
         containerColor = Color(0xFFF3F6FC)
     ) { innerPadding ->
@@ -99,6 +106,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
             if (estudianteSeleccionado == null) {
 
+                // Tarjetas con los nombres de los estudiantes
                 estudiantes.forEach { estudiante ->
 
                     Card(
@@ -174,9 +182,9 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                     }
                 }
 
-
             } else {
 
+                // Tarjeta de información del estudiante
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
@@ -193,9 +201,9 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        if (estudianteSeleccionado == "De la Cruz Cruz Saúl Yael") {
+                        if (esPerfilPersonalizado) {
 
-                            // Encabezado personalizado
+                            // Encabezado del perfil
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -214,12 +222,20 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Fotografía personal
+                            // Fotografía personal de Saúl o Juan
                             Image(
                                 painter = painterResource(
-                                    id = R.drawable.saul
+                                    id = if (esJuan) {
+                                        R.drawable.juan
+                                    } else {
+                                        R.drawable.saul
+                                    }
                                 ),
-                                contentDescription = "Foto de Saúl Yael",
+                                contentDescription = if (esJuan) {
+                                    "Foto de Juan de Jesús Gómez Sánchez"
+                                } else {
+                                    "Foto de Saúl Yael de la Cruz Cruz"
+                                },
                                 modifier = Modifier
                                     .size(145.dp)
                                     .clip(CircleShape),
@@ -229,7 +245,11 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Text(
-                                text = "Saúl Yael de la Cruz Cruz",
+                                text = if (esJuan) {
+                                    "Juan de Jesús Gómez Sánchez"
+                                } else {
+                                    "Saúl Yael de la Cruz Cruz"
+                                },
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
@@ -265,7 +285,7 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        // Información académica conservada
+                        // Información académica
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
