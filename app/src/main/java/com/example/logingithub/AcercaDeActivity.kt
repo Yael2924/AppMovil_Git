@@ -5,16 +5,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -168,97 +174,192 @@ fun PantallaAcercaDe(regresar: () -> Unit) {
                     }
                 }
 
+
             } else {
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
                     ),
                     elevation = CardDefaults.cardElevation(
-                        defaultElevation = 4.dp
+                        defaultElevation = 6.dp
                     )
                 ) {
+
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        // Nombre de la universidad ajustado al ancho disponible
-                        Text(
-                            text = "UNIVERSIDAD TECNOLÓGICA\nDE LA SELVA",
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF355CE7),
-                            textAlign = TextAlign.Center,
-                            lineHeight = 25.sp
-                        )
+                        if (estudianteSeleccionado == "De la Cruz Cruz Saúl Yael") {
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                            // Encabezado personalizado
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color(0xFF152443))
+                                    .padding(vertical = 24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "MI PERFIL",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    letterSpacing = 2.sp
+                                )
+                            }
 
-                        Text(
-                            text = "Ing. en Desarrollo y Gestión de Software",
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF152443),
-                            textAlign = TextAlign.Center
-                        )
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            // Fotografía personal
+                            Image(
+                                painter = painterResource(
+                                    id = R.drawable.saul
+                                ),
+                                contentDescription = "Foto de Saúl Yael",
+                                modifier = Modifier
+                                    .size(145.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
 
-                        Text(
-                            text = "Desarrollo Móvil Integral",
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 16.sp,
-                            color = Color(0xFF152443),
-                            textAlign = TextAlign.Center
-                        )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Saúl Yael de la Cruz Cruz",
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
 
-                        Text(
-                            text = "Grado: 10  Grupo: A",
-                            fontSize = 15.sp,
-                            color = Color(0xFF152443),
-                            textAlign = TextAlign.Center,
-                            lineHeight = 24.sp
-                        )
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Estudiante de Ingeniería de Software",
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                fontSize = 14.sp,
+                                color = Color(0xFF355CE7),
+                                textAlign = TextAlign.Center
+                            )
 
-                        Text(
-                            text = "Docente: Armando Méndez Morales",
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 15.sp,
-                            color = Color(0xFF152443),
-                            textAlign = TextAlign.Center
-                        )
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        Spacer(modifier = Modifier.height(25.dp))
+                        } else {
 
-                        HorizontalDivider(
-                            color = Color(0xFFD9E1F2)
-                        )
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        Spacer(modifier = Modifier.height(25.dp))
+                            Text(
+                                text = estudianteSeleccionado ?: "",
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
 
-                        Text(
-                            text = "$estudianteSeleccionado, " +
-                                    "estudiante de la Universidad Tecnológica " +
-                                    "de la Selva, cursando el 10 cuatrimestre " +
-                                    "del grupo A de la carrera Ing. en " +
-                                    "Desarrollo y Gestión de Software.",
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 16.sp,
-                            color = Color(0xFF333333),
-                            textAlign = TextAlign.Justify,
-                            lineHeight = 25.sp
-                        )
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+
+                        // Información académica conservada
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .padding(bottom = 26.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            HorizontalDivider(
+                                color = Color(0xFFD9E1F2)
+                            )
+
+                            Spacer(modifier = Modifier.height(22.dp))
+
+                            Text(
+                                text = "UNIVERSIDAD TECNOLÓGICA\nDE LA SELVA",
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF355CE7),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 25.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Text(
+                                text = "Ing. en Desarrollo y Gestión de Software",
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Desarrollo Móvil Integral",
+                                fontSize = 16.sp,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Grado: 10  |  Grupo: A",
+                                fontSize = 15.sp,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Docente: Armando Méndez Morales",
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 15.sp,
+                                color = Color(0xFF152443),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            HorizontalDivider(
+                                color = Color(0xFFD9E1F2)
+                            )
+
+                            Spacer(modifier = Modifier.height(22.dp))
+
+                            Text(
+                                text = "ACERCA DE MÍ",
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF355CE7)
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "$estudianteSeleccionado, " +
+                                        "estudiante de la Universidad Tecnológica " +
+                                        "de la Selva, cursando el 10 cuatrimestre " +
+                                        "del grupo A de la carrera Ing. en " +
+                                        "Desarrollo y Gestión de Software.",
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = 15.sp,
+                                color = Color(0xFF333333),
+                                textAlign = TextAlign.Justify,
+                                lineHeight = 24.sp
+                            )
+                        }
                     }
                 }
             }
